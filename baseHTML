@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Facebook Page Onboarding - Everbase</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            margin-bottom: 50px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.95;
+        }
+
+        /* Feature Cards */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+
+        .feature-card {
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+        }
+
+        .feature-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .feature-icon.blue { background: #e0f2fe; color: #0284c7; }
+        .feature-icon.green { background: #d1fae5; color: #059669; }
+        .feature-icon.purple { background: #ede9fe; color: #7c3aed; }
+
+        .feature-card h3 {
+            margin-bottom: 10px;
+            color: #1f2937;
+        }
+
+        .feature-card p {
+            color: #6b7280;
+            line-height: 1.5;
+        }
+
+        /* Form Container */
+        .form-container {
+            background: white;
+            border-radius: 12px;
+            padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.15);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .form-header {
+            margin-bottom: 30px;
+        }
+
+        .form-header h2 {
+            color: #1f2937;
+            margin-bottom: 15px;
+        }
+
+        .form-header p {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        .form-header ol {
+            color: #6b7280;
+            padding-left: 20px;
+            margin-bottom: 20px;
+        }
+
+        .form-header ol li {
+            margin-bottom: 5px;
+        }
+
+        /* Alert Boxes */
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .alert.warning {
+            background: #fef3c7;
+            border: 1px solid #f59e0b;
+            color: #92400e;
+        }
+
+        .alert.info {
+            background: #dbeafe;
+            border: 1px solid #3b82f6;
+            color: #1e40af;
+        }
+
+        .alert.success {
+            background: #d1fae5;
+            border: 1px solid #10b981;
+            color: #065f46;
+        }
+
+        .alert.error {
+            background: #fee2e2;
+            border: 1px solid #ef4444;
+            color: #991b1b;
+        }
+
+        /* Form Fields */
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #374151;
+        }
+
+        .form-group input[type="url"],
+        .form-group input[type="email"] {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .form-group input.error {
+            border-color: #ef4444;
+        }
+
+        .form-group input.success {
+            border-color: #10b981;
+        }
+
+        .validation-message {
+            margin-top: 5px;
+            font-size: 14px;
+        }
+
+        .validation-message.error {
+            color: #ef4444;
+        }
+
+        .validation-message.warning {
+            color: #f59e0b;
+        }
+
+        .validation-message.success {
+            color: #10b981;
+        }
+
+        /* Checkbox */
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            margin-top: 5px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            color: #4b5563;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        /* Submit Button */
+        .submit-button {
+            width: 100%;
+            padding: 14px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .submit-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .submit-button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .submit-button.loading {
+            position: relative;
+        }
+
+        /* Success View */
+        .success-view {
+            text-align: center;
+            padding: 40px;
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            background: #d1fae5;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+            font-size: 40px;
+            color: #10b981;
+        }
+
+        .success-view h3 {
+            color: #1f2937;
+            margin-bottom: 15px;
+            font-size: 24px;
+        }
+
+        .success-view p {
+            color: #6b7280;
+            margin-bottom: 30px;
+        }
+
+        .next-steps {
+            background: #eff6ff;
+            border: 1px solid #3b82f6;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: left;
+        }
+
+        .next-steps h4 {
+            color: #1e40af;
+            margin-bottom: 10px;
+        }
+
+        .next-steps ol {
+            color: #3730a3;
+            padding-left: 20px;
+        }
+
+        .next-steps ol li {
+            margin-bottom: 5px;
+        }
+
+        .retry-button {
+            padding: 12px 24px;
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .retry-button:hover {
+            background: #2563eb;
+        }
+
+        /* Technical Details */
+        .tech-details {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin-top: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .tech-details h2 {
+            color: #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 20px;
+        }
+
+        .tech-section h3 {
+            color: #374151;
+            margin-bottom: 15px;
+        }
+
+        .tech-section ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .tech-section ul li {
+            color: #6b7280;
+            margin-bottom: 8px;
+            padding-left: 20px;
+            position: relative;
+        }
+
+        .tech-section ul li:before {
+            content: "•";
+            position: absolute;
+            left: 0;
+            color: #9ca3af;
+        }
+
+        .code {
+            background: #f3f4f6;
+            padding: 3px 6px;
+            border-radius: 3px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid white;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-right: 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Email Notification Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.show {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h3 {
+            color: #1f2937;
+        }
+
+        .close-button {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+
+        .close-button:hover {
+            color: #1f2937;
+        }
+
+        .email-preview {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .email-preview h4 {
+            color: #374151;
+            margin-bottom: 10px;
+        }
+
+        .email-preview p {
+            color: #6b7280;
+            margin-bottom: 10px;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .form-container {
+                padding: 25px;
+            }
+
+            .features {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>Facebook Page Onboarding</h1>
+            <p>Streamline your Facebook integration setup with our automated onboarding system</p>
+        </div>
+
+        <!-- Feature Cards -->
+        <div class="features">
+            <div class="feature-card">
+                <div class="feature-icon blue">⚡</div>
+                <h3>Automatic Token Refresh</h3>
+                <p>Your Facebook access tokens are automatically refreshed when they're close to expiring, ensuring uninterrupted service.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon green">✓</div>
+                <h3>Real-time Validation</h3>
+                <p>Instant validation of Facebook URLs, email addresses, and access tokens with helpful feedback and suggestions.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon purple">🔒</div>
+                <h3>Secure Processing</h3>
+                <p>Enterprise-grade security with rate limiting, input validation, and secure token handling throughout the process.</p>
+            </div>
+        </div>
+
+        <!-- Main Form Container -->
+        <div class="form-container" id="formContainer">
+            <div class="form-header">
+                <h2>Connect Your Facebook Page</h2>
+                <p>To set up Facebook publishing, we need:</p>
+                <ol>
+                    <li>Your Facebook Business Page URL (not your personal profile)</li>
+                    <li>The email address of the Facebook account that manages this page</li>
+                    <li>Confirmation that you have admin access to the page</li>
+                </ol>
+                <div class="alert warning">
+                    <strong>Important:</strong> You must be an Admin or Editor of the Facebook page to complete this connection. 
+                    If you're not sure, check your page roles in Facebook Business Manager.
+                </div>
+            </div>
+
+            <form id="onboardingForm">
+                <!-- Facebook Page URL -->
+                <div class="form-group">
+                    <label for="facebookPageUrl">Facebook Page URL *</label>
+                    <input 
+                        type="url" 
+                        id="facebookPageUrl" 
+                        name="facebookPageUrl"
+                        placeholder="https://facebook.com/yourpage"
+                        required
+                    >
+                    <div class="validation-message" id="urlValidation"></div>
+                </div>
+
+                <!-- Facebook Email -->
+                <div class="form-group">
+                    <label for="facebookEmail">Facebook Account Email *</label>
+                    <input 
+                        type="email" 
+                        id="facebookEmail" 
+                        name="facebookEmail"
+                        placeholder="admin@yourbusiness.com"
+                        required
+                    >
+                    <div class="validation-message" id="emailValidation"></div>
+                    <div class="alert info" style="margin-top: 10px;">
+                        <strong>Important:</strong> This must be the email address of the Facebook account that has admin access to your business page. 
+                        We'll use this email to send you a secure OAuth link to complete the Facebook connection.
+                    </div>
+                </div>
+
+                <!-- Confirmation Checkbox -->
+                <div class="checkbox-group">
+                    <input 
+                        type="checkbox" 
+                        id="confirmAccount" 
+                        name="confirmAccount"
+                        required
+                    >
+                    <label for="confirmAccount">
+                        I confirm that I have admin access to the Facebook page and can manage its publishing settings.
+                    </label>
+                </div>
+
+                <!-- Error Alert (hidden by default) -->
+                <div class="alert error" id="errorAlert" style="display: none;"></div>
+
+                <!-- Submit Button -->
+                <button type="submit" class="submit-button" id="submitButton">
+                    Submit Facebook Connection Request
+                </button>
+            </form>
+
+            <!-- Additional Information -->
+            <div style="margin-top: 30px; padding: 20px; background: #f9fafb; border-radius: 8px;">
+                <h4 style="color: #374151; margin-bottom: 10px;">How the connection process works:</h4>
+                <ol style="color: #6b7280; padding-left: 20px;">
+                    <li>Submit this form with your Facebook page details</li>
+                    <li>Our team adds you to the beta tester list</li>
+                    <li>You receive an email with a secure OAuth link</li>
+                    <li>Click the link to authorize with Facebook</li>
+                    <li>We automatically exchange for a long-lived token</li>
+                    <li>We verify your connection works</li>
+                    <li>You receive confirmation when everything is ready</li>
+                </ol>
+                <p style="color: #9ca3af; margin-top: 15px; font-size: 14px;">
+                    <strong>Note:</strong> This process typically takes 1-2 business days. You'll receive email updates at each step.
+                </p>
+            </div>
+        </div>
+
+        <!-- Technical Details -->
+        <div class="tech-details">
+            <h2>Technical Implementation Details</h2>
+            <div class="tech-grid">
+                <div class="tech-section">
+                    <h3>Token Refresh Integration</h3>
+                    <ul>
+                        <li>Automatic token expiration detection</li>
+                        <li>Proactive refresh 5 days before expiry</li>
+                        <li>Facebook Graph API integration</li>
+                        <li>Health check validation</li>
+                        <li>Error handling and fallback options</li>
+                    </ul>
+                </div>
+                <div class="tech-section">
+                    <h3>API Endpoints</h3>
+                    <ul>
+                        <li><span class="code">POST /api/facebook/onboard</span></li>
+                        <li><span class="code">POST /api/put-fb-token-refresh</span></li>
+                        <li><span class="code">GET /api/facebook/onboard</span> (health check)</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="alert info" style="margin-top: 20px;">
+                <h4 style="margin-bottom: 10px;">Integration Benefits</h4>
+                <ul style="padding-left: 20px; color: #1e40af;">
+                    <li>Seamless token management during onboarding</li>
+                    <li>Reduced manual intervention for token refresh</li>
+                    <li>Improved user experience with real-time feedback</li>
+                    <li>Enterprise-grade security and validation</li>
+                    <li>Scalable architecture for high-volume onboarding</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email Notification Modal -->
+    <div class="modal" id="emailModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>📧 Email Notifications Sent</h3>
+                <button class="close-button" onclick="closeEmailModal()">&times;</button>
+            </div>
+            <div class="email-preview">
+                <h4>Customer Confirmation Email</h4>
+                <p><strong>To:</strong> <span id="customerEmailDisplay"></span></p>
+                <p><strong>Subject:</strong> Facebook Connection Request Received - Next Steps</p>
+                <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 4px;">
+                    <p>Hi there,</p>
+                    <p>We've received your Facebook connection request for:</p>
+                    <ul style="padding-left: 20px; margin: 10px 0;">
+                        <li><strong>Facebook Page:</strong> <span id="pageUrlDisplay"></span></li>
+                        <li><strong>Organization:</strong> Your Organization</li>
+                    </ul>
+                    <p><strong>What happens next?</strong></p>
+                    <ol style="padding-left: 20px; margin: 10px 0;">
+                        <li>Our team will add your Facebook account as a tester (within 24 hours)</li>
+                        <li>You'll receive an email with connection instructions</li>
+                        <li>Follow the instructions to complete your Facebook integration</li>
+                    </ol>
+                    <p><strong>Expected timeline:</strong> 1-2 business days</p>
+                    <p>Thanks,<br>The Everbase Team</p>
+                </div>
+            </div>
+            <div class="email-preview">
+                <h4>Admin Notification Email</h4>
+                <p><strong>To:</strong> admin@everbase.io</p>
+                <p><strong>Subject:</strong> New Facebook Connection Request</p>
+                <div style="margin-top: 15px; padding: 15px; background: white; border-radius: 4px;">
+                    <p>New Facebook connection request received:</p>
+                    <table style="width: 100%; margin: 10px 0;">
+                        <tr>
+                            <td style="padding: 5px; font-weight: bold;">Customer Email:</td>
+                            <td style="padding: 5px;"><span id="adminCustomerEmail"></span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px; font-weight: bold;">Facebook Page:</td>
+                            <td style="padding: 5px;"><span id="adminPageUrl"></span></td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 5px; font-weight: bold;">Request ID:</td>
+                            <td style="padding: 5px;"><span id="requestIdDisplay"></span></td>
+                        </tr>
+                    </table>
+                    <p><strong>Next Steps:</strong></p>
+                    <ol style="padding-left: 20px;">
+                        <li>Add user as tester in Facebook App</li>
+                        <li>Send OAuth connection link</li>
+                        <li>Update request status in dashboard</li>
+                    </ol>
+                </div>
+            </div>
+            <button class="retry-button" onclick="closeEmailModal()">Close</button>
+        </div>
+    </div>
+
+    <script>
+        // Form validation patterns
+        const facebookUrlPattern = /^https?:\/\/(www\.)?(facebook\.com|fb\.me)\/.+/;
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        const personalEmailDomains = ['gmail.com', 'yahoo.com', 'hotmail.com', 'outlook.com', 'aol.com', 'icloud.com'];
+
+        // Form elements
+        const form = document.getElementById('onboardingForm');
+        const urlInput = document.getElementById('facebookPageUrl');
+        const emailInput = document.getElementById('facebookEmail');
+        const confirmCheckbox = document.getElementById('confirmAccount');
+        const submitButton = document.getElementById('submitButton');
+        const errorAlert = document.getElementById('errorAlert');
+        const formContainer = document.getElementById('formContainer');
+
+        // Validation elements
+        const urlValidation = document.getElementById('urlValidation');
+        const emailValidation = document.getElementById('emailValidation');
+
+        // Real-time URL validation
+        urlInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (!value) {
+                urlValidation.textContent = '';
+                urlValidation.className = 'validation-message';
+                this.className = '';
+                return;
+            }
+
+            if (facebookUrlPattern.test(value)) {
+                urlValidation.textContent = '✓ Valid Facebook page URL';
+                urlValidation.className = 'validation-message success';
+                this.className = 'success';
+            } else {
+                urlValidation.textContent = 'Please enter a valid Facebook page URL (e.g., facebook.com/yourpage)';
+                urlValidation.className = 'validation-message error';
+                this.className = 'error';
+            }
+        });
+
+        // Real-time email validation
+        emailInput.addEventListener('input', function() {
+            const value = this.value.trim();
+            
+            if (!value) {
+                emailValidation.textContent = '';
+                emailValidation.className = 'validation-message';
+                this.className = '';
+                return;
+            }
+
+            if (!emailPattern.test(value)) {
+                emailValidation.textContent = 'Please enter a valid email address';
+                emailValidation.className = 'validation-message error';
+                this.className = 'error';
+                return;
+            }
+
+            const domain = value.split('@')[1]?.toLowerCase();
+            if (domain && personalEmailDomains.includes(domain)) {
+                emailValidation.textContent = '⚠ Personal email detected. Please use the email associated with your Facebook business account.';
+                emailValidation.className = 'validation-message warning';
+                this.className = '';
+            } else {
+                emailValidation.textContent = '✓ Valid email address';
+                emailValidation.className = 'validation-message success';
+                this.className = 'success';
+            }
+        });
+
+        // Form submission
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            // Clear previous errors
+            errorAlert.style.display = 'none';
+            errorAlert.textContent = '';
+
+            // Validate all fields
+            const urlValue = urlInput.value.trim();
+            const emailValue = emailInput.value.trim();
+            const confirmValue = confirmCheckbox.checked;
+
+            if (!facebookUrlPattern.test(urlValue)) {
+                showError('Please enter a valid Facebook page URL');
+                return;
+            }
+
+            if (!emailPattern.test(emailValue)) {
+                showError('Please enter a valid email address');
+                return;
+            }
+
+            if (!confirmValue) {
+                showError('Please confirm that you have admin access to the Facebook page');
+                return;
+            }
+
+            // Disable submit button and show loading state
+            submitButton.disabled = true;
+            submitButton.innerHTML = '<span class="spinner"></span> Submitting...';
+
+            // Simulate API call with mock endpoint
+            try {
+                // Simulate network delay
+                await new Promise(resolve => setTimeout(resolve, 2000));
+
+                // Mock API response
+                const mockResponse = {
+                    success: true,
+                    message: 'Your Facebook connection request has been received successfully.',
+                    requestId: `onboard-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                    nextSteps: [
+                        'Our team will review your request and add you to the beta tester list',
+                        'You will receive an email with a secure OAuth link to authorize with Facebook',
+                        'Click the OAuth link to complete your Facebook authorization',
+                        'We will automatically set up your long-lived access token',
+                        'You will receive confirmation when your connection is operational'
+                    ]
+                };
+
+                // Simulate sending emails
+                simulateEmailNotifications(emailValue, urlValue, mockResponse.requestId);
+
+                // Show success view
+                showSuccessView(mockResponse);
+
+            } catch (error) {
+                showError('Network error. Please check your connection and try again.');
+                submitButton.disabled = false;
+                submitButton.innerHTML = 'Submit Facebook Connection Request';
+            }
+        });
+
+        function showError(message) {
+            errorAlert.textContent = message;
+            errorAlert.style.display = 'block';
+            errorAlert.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+
+        function showSuccessView(response) {
+            formContainer.innerHTML = `
+                <div class="success-view">
+                    <div class="success-icon">✓</div>
+                    <h3>Request Submitted Successfully!</h3>
+                    <p>${response.message}</p>
+                    
+                    <div class="next-steps">
+                        <h4>What happens next?</h4>
+                        <ol>
+                            ${response.nextSteps.map((step, index) => `<li>${index + 1}. ${step}</li>`).join('')}
+                        </ol>
+                    </div>
+                    
+                    <div class="alert info">
+                        <strong>Request ID:</strong> ${response.requestId}<br>
+                        <small>Save this ID for your reference. You'll also receive it in your confirmation email.</small>
+                    </div>
+                    
+                    <button class="retry-button" onclick="resetForm()">Submit Another Request</button>
+                </div>
+            `;
+        }
+
+        function resetForm() {
+            location.reload();
+        }
+
+        function simulateEmailNotifications(email, pageUrl, requestId) {
+            // Update modal content
+            document.getElementById('customerEmailDisplay').textContent = email;
+            document.getElementById('pageUrlDisplay').textContent = pageUrl;
+            document.getElementById('adminCustomerEmail').textContent = email;
+            document.getElementById('adminPageUrl').textContent = pageUrl;
+            document.getElementById('requestIdDisplay').textContent = requestId;
+            
+            // Show modal after a short delay
+            setTimeout(() => {
+                document.getElementById('emailModal').classList.add('show');
+            }, 500);
+        }
+
+        function closeEmailModal() {
+            document.getElementById('emailModal').classList.remove('show');
+        }
+
+        // Close modal when clicking outside
