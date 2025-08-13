@@ -777,6 +777,11 @@
         form.addEventListener('submit', async function(e) {
             e.preventDefault();
             
+            // Check rate limit first
+            if (!checkRateLimit()) {
+                return false;
+            }
+            
             // Clear previous errors
             errorAlert.style.display = 'none';
             errorAlert.textContent = '';
@@ -824,13 +829,19 @@
                     ]
                 };
 
-                // Simulate sending emails
-                simulateEmailNotifications(emailValue, urlValue, mockResponse.requestId);
+                // Clear saved form data
+                clearSavedFormData();
 
                 // Show success view
                 showSuccessView(mockResponse);
 
+                // Simulate sending emails after showing success
+                setTimeout(() => {
+                    simulateEmailNotifications(emailValue, urlValue, mockResponse.requestId);
+                }, 500);
+
             } catch (error) {
+                console.error('Error during submission:', error);
                 showError('Network error. Please check your connection and try again.');
                 submitButton.disabled = false;
                 submitButton.innerHTML = 'Submit Facebook Connection Request';
@@ -844,6 +855,8 @@
         }
 
         function showSuccessView(response) {
+            console.log('Showing success view with response:', response);
+            
             formContainer.innerHTML = `
                 <div class="success-view">
                     <div class="success-icon">✓</div>
@@ -853,18 +866,21 @@
                     <div class="next-steps">
                         <h4>What happens next?</h4>
                         <ol>
-                            ${response.nextSteps.map((step, index) => `<li>${index + 1}. ${step}</li>`).join('')}
+                            ${response.nextSteps.map((step, index) => `<li>${step}</li>`).join('')}
                         </ol>
                     </div>
                     
-                    <div class="alert info">
+                    <div class="alert info" style="cursor: pointer;" onclick="copyToClipboard('${response.requestId}')">
                         <strong>Request ID:</strong> ${response.requestId}<br>
-                        <small>Save this ID for your reference. You'll also receive it in your confirmation email.</small>
+                        <small>Click to copy this ID for your reference. You'll also receive it in your confirmation email.</small>
                     </div>
                     
                     <button class="retry-button" onclick="resetForm()">Submit Another Request</button>
                 </div>
             `;
+            
+            // Scroll to top to show success message
+            window.scrollTo({ top: 0, behavior: 'smooth' });
         }
 
         function resetForm() {
@@ -897,7 +913,7 @@
             }
         });
 
-        // Add keyboard support for modal
+        // Add keyboard support for closing modal
         document.addEventListener('keydown', function(event) {
             if (event.key === 'Escape') {
                 closeEmailModal();
@@ -905,9 +921,10 @@
         });
 
         // Mock API health check on page load
-        window.addEventListener('load', async function() {
+        window.addEventListener('load', function() {
             // Simulate checking API health
-            console.log('Mock API Health Check:', {
+            console.log('Mock API Health Check:');
+            console.log({
                 status: 'healthy',
                 timestamp: new Date().toISOString(),
                 services: {
@@ -932,45 +949,194 @@
         function checkRateLimit() {
             const now = Date.now();
             
-            // Reset rate limit if window has passed
-            if (rateLimitResetTime && now > rateLimitResetTime) {
+            if (rateLimitResetTime && now < rateLimitResetTime) {
+                if (submissionCount >= MAX_SUBMISSIONS) {
+                    const resetDate = new Date(rateLimitResetTime);
+                    const minutes = Math.ceil((rateLimitResetTime - now) / 60000);
+                    showError(`Too many requests. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`);
+                    return false;
+                }
+            } else {
                 submissionCount = 0;
-                rateLimitResetTime = null;
-            }
-            
-            // Set initial rate limit window
-            if (!rateLimitResetTime) {
                 rateLimitResetTime = now + RATE_LIMIT_WINDOW;
-            }
-            
-            // Check if limit exceeded
-            if (submissionCount >= MAX_SUBMISSIONS) {
-                const resetDate = new Date(rateLimitResetTime);
-                const minutes = Math.ceil((rateLimitResetTime - now) / 60000);
-                showError(`Too many requests. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`);
-                return false;
             }
             
             submissionCount++;
             return true;
         }
 
-        // Enhanced form submission with rate limiting
-        const originalSubmitHandler = form.onsubmit;
-        form.onsubmit = async function(e) {
-            e.preventDefault();
-            
-            // Check rate limit first
-            if (!checkRateLimit()) {
-                return;
-            }
-            
-            // Continue with original submission logic
-            originalSubmitHandler.call(this, e);
-        };
+        // Auto-save form data to localStorage
+        function saveFormData() {
+            const formData = {
+                facebookPageUrl: urlInput.value,
+                facebookEmail: emailInput.value,
+                confirmAccount: confirmCheckbox.checked,
+                timestamp: Date.now()
+            };
+            localStorage.setItem('facebook_onboarding_draft', JSON.stringify(formData));
+        }
 
-        // Add console logging for debugging
-        console.log('%c Facebook Onboarding Form Loaded ', 'background: #667eea; color: white; padding: 5px 10px; border-radius: 3px;');
-        console.log('Mock API Endpoint: /api/facebook/onboard (simulated)');
-        console.log('Rate Limiting: Max 3 submissions per 5 minutes');
-        console.log('Email Service: Simulated (check modal for preview)');
+        // Restore form data from localStorage
+        function restoreFormData() {
+            const savedData = localStorage.getItem('facebook_onboarding_draft');
+            if (savedData) {
+                try {
+                    const formData = JSON.parse(savedData);
+                    // Only restore if less than 24 hours old
+                    if (Date.now() - formData.timestamp < 24 * 60 * 60 * 1000) {
+                        urlInput.value = formData.facebookPageUrl || '';
+                        emailInput.value = formData.facebookEmail || '';
+                        confirmCheckbox.checked = formData.confirmAccount || false;
+                        
+                        // Trigger validation
+                        urlInput.dispatchEvent(new Event('input'));
+                        emailInput.dispatchEvent(new Event('input'));
+                    } else {
+                        localStorage.removeItem('facebook_onboarding_draft');
+                    }
+                } catch (e) {
+                    console.error('Failed to restore form data:', e);
+                }
+            }
+        }
+
+        // Auto-save on input
+        urlInput.addEventListener('input', saveFormData);
+        emailInput.addEventListener('input', saveFormData);
+        confirmCheckbox.addEventListener('change', saveFormData);
+
+        // Restore on page load
+        document.addEventListener('DOMContentLoaded', restoreFormData);
+
+        // Clear saved data on successful submission
+        function clearSavedFormData() {
+            localStorage.removeItem('facebook_onboarding_draft');
+        }
+
+        // Mock token refresh status indicator
+        function createTokenStatusIndicator() {
+            const statusDiv = document.createElement('div');
+            statusDiv.id = 'tokenStatus';
+            statusDiv.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                right: 20px;
+                background: white;
+                padding: 15px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                display: none;
+                z-index: 999;
+                max-width: 300px;
+            `;
+            statusDiv.innerHTML = `
+                <div style="display: flex; align-items: center; margin-bottom: 10px;">
+                    <div style="width: 10px; height: 10px; border-radius: 50%; background: #10b981; margin-right: 10px;"></div>
+                    <strong style="color: #374151;">Token Status</strong>
+                </div>
+                <p style="color: #6b7280; font-size: 14px; margin: 0;">
+                    Mock token refresh system active. Tokens will be automatically refreshed 5 days before expiry.
+                </p>
+            `;
+            document.body.appendChild(statusDiv);
+        }
+
+        createTokenStatusIndicator();
+
+        // Show token status on hover over feature card
+        document.querySelectorAll('.feature-card').forEach(card => {
+            if (card.textContent.includes('Token Refresh')) {
+                card.addEventListener('mouseenter', function() {
+                    document.getElementById('tokenStatus').style.display = 'block';
+                });
+                card.addEventListener('mouseleave', function() {
+                    setTimeout(() => {
+                        document.getElementById('tokenStatus').style.display = 'none';
+                    }, 2000);
+                });
+            }
+        });
+
+        // Add copy to clipboard for request ID
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            textarea.style.position = 'fixed';
+            textarea.style.opacity = '0';
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            
+            // Show toast notification
+            showToast('Request ID copied to clipboard!');
+        }
+
+        // Toast notification
+        function showToast(message) {
+            const toast = document.createElement('div');
+            toast.style.cssText = `
+                position: fixed;
+                bottom: 100px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: #374151;
+                color: white;
+                padding: 12px 24px;
+                border-radius: 6px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+                z-index: 10000;
+                animation: slideUp 0.3s ease, fadeOut 0.3s ease 2.7s;
+            `;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                document.body.removeChild(toast);
+            }, 3000);
+        }
+
+        // Enhanced success view with copy functionality - removed duplicate
+        
+        // Debug mode for developers
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('debug') === 'true') {
+            console.log('Debug mode enabled');
+            
+            // Add debug panel
+            const debugPanel = document.createElement('div');
+            debugPanel.style.cssText = `
+                position: fixed;
+                top: 10px;
+                right: 10px;
+                background: #1f2937;
+                color: white;
+                padding: 10px;
+                border-radius: 6px;
+                font-family: monospace;
+                font-size: 12px;
+                z-index: 10000;
+            `;
+            debugPanel.innerHTML = `
+                <strong>DEBUG MODE</strong><br>
+                Rate Limit: ${submissionCount}/${MAX_SUBMISSIONS}<br>
+                Mock API: Enabled<br>
+                <button onclick="localStorage.clear(); alert('LocalStorage cleared');" style="margin-top: 5px; padding: 2px 5px;">Clear Cache</button>
+            `;
+            document.body.appendChild(debugPanel);
+        }
+
+        // Performance monitoring
+        window.addEventListener('load', function() {
+            if (window.performance && window.performance.timing) {
+                const loadTime = window.performance.timing.loadEventEnd - window.performance.timing.navigationStart;
+                console.log(`Page load time: ${loadTime}ms`);
+            }
+        });
+
+        // Service worker registration for offline support (optional)
+        if ('serviceWorker' in navigator && location.protocol === 'https:') {
+            navigator.serviceWorker.register('/sw.js').catch(function(error) {
+                console.log('Service Worker registration failed:', error);
+            });
+        }
