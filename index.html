@@ -890,3 +890,87 @@
         }
 
         // Close modal when clicking outside
+        window.addEventListener('click', function(event) {
+            const modal = document.getElementById('emailModal');
+            if (event.target === modal) {
+                closeEmailModal();
+            }
+        });
+
+        // Add keyboard support for modal
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                closeEmailModal();
+            }
+        });
+
+        // Mock API health check on page load
+        window.addEventListener('load', async function() {
+            // Simulate checking API health
+            console.log('Mock API Health Check:', {
+                status: 'healthy',
+                timestamp: new Date().toISOString(),
+                services: {
+                    onboarding: 'healthy',
+                    oauth: 'healthy',
+                    rateLimiting: 'healthy'
+                },
+                features: {
+                    facebookOnboarding: true,
+                    oauthFlow: true,
+                    rateLimiting: true
+                }
+            });
+        });
+
+        // Rate limiting simulation
+        let submissionCount = 0;
+        let rateLimitResetTime = null;
+        const MAX_SUBMISSIONS = 3;
+        const RATE_LIMIT_WINDOW = 5 * 60 * 1000; // 5 minutes
+
+        function checkRateLimit() {
+            const now = Date.now();
+            
+            // Reset rate limit if window has passed
+            if (rateLimitResetTime && now > rateLimitResetTime) {
+                submissionCount = 0;
+                rateLimitResetTime = null;
+            }
+            
+            // Set initial rate limit window
+            if (!rateLimitResetTime) {
+                rateLimitResetTime = now + RATE_LIMIT_WINDOW;
+            }
+            
+            // Check if limit exceeded
+            if (submissionCount >= MAX_SUBMISSIONS) {
+                const resetDate = new Date(rateLimitResetTime);
+                const minutes = Math.ceil((rateLimitResetTime - now) / 60000);
+                showError(`Too many requests. Please try again in ${minutes} minute${minutes > 1 ? 's' : ''}.`);
+                return false;
+            }
+            
+            submissionCount++;
+            return true;
+        }
+
+        // Enhanced form submission with rate limiting
+        const originalSubmitHandler = form.onsubmit;
+        form.onsubmit = async function(e) {
+            e.preventDefault();
+            
+            // Check rate limit first
+            if (!checkRateLimit()) {
+                return;
+            }
+            
+            // Continue with original submission logic
+            originalSubmitHandler.call(this, e);
+        };
+
+        // Add console logging for debugging
+        console.log('%c Facebook Onboarding Form Loaded ', 'background: #667eea; color: white; padding: 5px 10px; border-radius: 3px;');
+        console.log('Mock API Endpoint: /api/facebook/onboard (simulated)');
+        console.log('Rate Limiting: Max 3 submissions per 5 minutes');
+        console.log('Email Service: Simulated (check modal for preview)');
